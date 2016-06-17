@@ -8,41 +8,28 @@
 
 import UIKit
 
-class ViewController: UIViewController,UITextViewDelegate {
-    lazy private  var textView: UILabel = {
-        let object = UILabel()
-//        object.dataDetectorTypes = .All
-//        object.editable = false
-//        object.scrollEnabled = false
-        object.font = UIFont.systemFontOfSize(13)
-        object.text = "我的GitHub主页"
-        object.sizeToFit()
-        return object
-    }()
+class ViewController: UIViewController {
     lazy private  var urlBtn: UIButton = {
         let object = UIButton()
-        object.setTitle("https://github.com/tankco", forState: .Normal)
+        object.setTitle("进入百度", forState: .Normal)
         object.setTitleColor(UIColor.blueColor(), forState: .Normal)
         object.titleLabel?.font = UIFont.systemFontOfSize(13)
-        object.sizeToFit()
         object.addTarget(self, action: #selector(urldidClick), forControlEvents: .TouchUpInside)
         return object
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(textView)
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        view.addConstraint(NSLayoutConstraint(item: textView, attribute: .Left, relatedBy: .Equal, toItem: view,attribute: .Left, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: textView, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1, constant: 30))
         view.addSubview(urlBtn)
         urlBtn.translatesAutoresizingMaskIntoConstraints = false
-        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .Left, relatedBy: .Equal, toItem: textView, attribute: .Right, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .CenterY, relatedBy: .Equal, toItem: textView, attribute: .CenterY, multiplier: 1, constant: 0))
-        
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .CenterX, relatedBy: .Equal, toItem: view, attribute: .CenterX, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .CenterY, relatedBy: .Equal, toItem: view, attribute: .CenterY, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1, constant: 100))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1, constant: 100))
     }
     func urldidClick() {
-        print("ddddd")
+        let vc = TCWebViewController()
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
