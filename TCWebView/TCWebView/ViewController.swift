@@ -29,6 +29,7 @@ class ViewController: UIViewController {
     }
     func urldidClick() {
         let vc = TCWebViewController()
+        vc.url = NSURL(string: "https://m.baidu.com")
         self.navigationController?.pushViewController(vc, animated: true)
     }
     override func didReceiveMemoryWarning() {

@@ -8,43 +8,39 @@
 
 import UIKit
 struct SnapShot{
-    private var request : NSURLRequest?
-    private var snapShotView : UIView?
+    var request : NSURLRequest?
+    var snapShotView : UIView?
     init(req:NSURLRequest?,snapView:UIView?){
         request = req
         snapShotView = snapView
     }
 }
-class TCWebViewController: UIViewController,UIWebViewDelegate {
+class TCWebViewController: UIViewController {
     var url : NSURL?{
         didSet{
             webView.loadRequest(NSURLRequest(URL: url!))
         }
     }
-    
-    lazy private  var swipingBackgoundView: UIView = {
-        let object = UIView(frame: self.view.bounds)
-        object.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
-        return object
-    }()
-    
-    lazy private  var webView: UIWebView = {
-        let wbView = UIWebView(frame: self.view.bounds)
-        wbView.delegate = self
-        wbView.scalesPageToFit = true
-        wbView.backgroundColor = UIColor.whiteColor()
-        wbView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(swipePanGestureHandler)))
-        return wbView
-    }()
-    func swipePanGestureHandler(panGesture:UIPanGestureRecognizer) {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        webView.delegate = self
+        webView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(swipePanGestureHandler)))
+        isSwipingBack = false
+        view.backgroundColor = UIColor.whiteColor()
+        navigationItem.leftItemsSupplementBackButton = true
+        view.addSubview(webView)
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Bottom, relatedBy: .Equal, toItem: view, attribute: .Bottom, multiplier: 1, constant: 0))
+    }
+    @objc private func swipePanGestureHandler(panGesture:UIPanGestureRecognizer) {
         let translation =  panGesture.translationInView(webView)
         let location = panGesture.locationInView(webView)
         switch panGesture.state {
         case .Began:
-            if location.x <= 50 && translation.x > 0
-            {
-                startPopSnapshotView()
-            }
+            if location.x <= 50 && translation.x > 0{startPopSnapshotView()}
             break
         case .Changed:
             popSnapShotViewWithPanGestureDistance(translation.x)
@@ -54,10 +50,10 @@ class TCWebViewController: UIViewController,UIWebViewDelegate {
             break
         }
     }
-    var isSwipingBack : Bool = false
-    var currentSnapShotView:UIView?
-    var prevSnapShotView:UIView?
-    func startPopSnapshotView()  {
+    private var isSwipingBack : Bool = false
+    private var currentSnapShotView:UIView?
+    private var prevSnapShotView:UIView?
+    private func startPopSnapshotView(){
         if isSwipingBack {return}
         if !webView.canGoBack { return }
         isSwipingBack = true
@@ -77,7 +73,7 @@ class TCWebViewController: UIViewController,UIWebViewDelegate {
         view.addSubview(swipingBackgoundView)
         view.addSubview(currentSnapShotView!)
     }
-    func endPopSnapShotView() {
+    private func endPopSnapShotView() {
         if !isSwipingBack {return}
         view.userInteractionEnabled = false
         if currentSnapShotView?.center.x >= view.bounds.size.width {
@@ -97,20 +93,20 @@ class TCWebViewController: UIViewController,UIWebViewDelegate {
                     self.isSwipingBack = false
             })
         }else{
-        UIView.animateWithDuration(0.2, animations: { 
-            self.currentSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2, self.GetboundsHeight()/2)
-            self.prevSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2-60, self.GetboundsHeight())
-            self.prevSnapShotView?.alpha = 1
-            }, completion: { (_) in
-                self.prevSnapShotView?.removeFromSuperview()
-                self.swipingBackgoundView.removeFromSuperview()
-                self.currentSnapShotView?.removeFromSuperview()
-                self.view.userInteractionEnabled = true
-                self.isSwipingBack = false
-        })
+            UIView.animateWithDuration(0.2, animations: {
+                self.currentSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2, self.GetboundsHeight()/2)
+                self.prevSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2-60, self.GetboundsHeight())
+                self.prevSnapShotView?.alpha = 1
+                }, completion: { (_) in
+                    self.prevSnapShotView?.removeFromSuperview()
+                    self.swipingBackgoundView.removeFromSuperview()
+                    self.currentSnapShotView?.removeFromSuperview()
+                    self.view.userInteractionEnabled = true
+                    self.isSwipingBack = false
+            })
         }
     }
-    func popSnapShotViewWithPanGestureDistance(distance:CGFloat) {
+    private func popSnapShotViewWithPanGestureDistance(distance:CGFloat) {
         if !isSwipingBack {return}
         if distance <= 0 {return}
         var currentSnapshotViewCenter = CGPointMake(GetboundsWidth()/2, GetboundsHeight()/2)
@@ -122,11 +118,32 @@ class TCWebViewController: UIViewController,UIWebViewDelegate {
         prevSnapShotView!.center = prevSnapshotViewCenter
         swipingBackgoundView.alpha = (GetboundsWidth() - distance)/GetboundsWidth()
     }
+    private var snapShotsArray : [SnapShot] = []
+    private func pushCurrentSnapShotViewWithRequest(request:NSURLRequest) {
+        let lastRequest = snapShotsArray.last?.request
+        if request.URL?.absoluteString == "about:blank" {return}
+        if lastRequest?.URL?.absoluteString == request.URL?.absoluteString {return}
+        let shotView = self.webView.snapshotViewAfterScreenUpdates(true)
+        snapShotsArray.append(SnapShot(req: request, snapView: shotView))
+    }
     override func preferredStatusBarStyle() -> UIStatusBarStyle {
         return .LightContent
     }
+    private let webView:UIWebView = {
+        let wbView = UIWebView()
+        wbView.scalesPageToFit = true
+        wbView.backgroundColor = UIColor.whiteColor()
+        return wbView
+    }()
+    lazy private  var swipingBackgoundView: UIView = {
+        let object = UIView(frame: self.view.bounds)
+        object.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+        return object
+    }()
+}
+extension TCWebViewController:UIWebViewDelegate{
     func webView(webView: UIWebView, shouldStartLoadWithRequest request: NSURLRequest, navigationType: UIWebViewNavigationType) -> Bool {
-        switch navigationType {
+        switch navigationType{
         case .LinkClicked:
             pushCurrentSnapShotViewWithRequest(request)
             break
@@ -142,13 +159,8 @@ class TCWebViewController: UIViewController,UIWebViewDelegate {
         updateNavigationItems()
         return true
     }
-    func updateNavigationItems() {
-        if webView.canGoBack {
-            navigationController?.interactivePopGestureRecognizer?.enabled = false
-        }else{
-            navigationController?.interactivePopGestureRecognizer?.enabled = true
-            
-        }
+    private func updateNavigationItems() {
+        navigationController?.interactivePopGestureRecognizer?.enabled = !webView.canGoBack
     }
     func webViewDidStartLoad(webView: UIWebView) {
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
@@ -163,62 +175,10 @@ class TCWebViewController: UIViewController,UIWebViewDelegate {
         }
         self.title = titleS
     }
-    
-    var snapShotsArray : [SnapShot] = []
-    func pushCurrentSnapShotViewWithRequest(request:NSURLRequest) {
-        let lastRequest = snapShotsArray.last?.request
-        if request.URL?.absoluteString == "about:blank" {return}
-        if lastRequest?.URL?.absoluteString == request.URL?.absoluteString {return}
-        let shotView = self.webView.snapshotViewAfterScreenUpdates(true)
-        snapShotsArray.append(SnapShot(req: request, snapView: shotView))
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        isSwipingBack = false
-        title = ""
-        view.backgroundColor = UIColor.whiteColor()
-        navigationItem.leftItemsSupplementBackButton = true
-        url = NSURL(string: "https://m.baidu.com")
-        view.addSubview(webView)
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Left, relatedBy: .Equal, toItem: view, attribute: .Left, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Top, relatedBy: .Equal, toItem: view, attribute: .Top, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Right, relatedBy: .Equal, toItem: view, attribute: .Right, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: webView, attribute: .Bottom, relatedBy: .Equal, toItem: view, attribute: .Bottom, multiplier: 1, constant: 0))
-        
-        // Do any additional setup after loading the view.
-    }
     private func GetboundsWidth() -> CGFloat {
         return self.view.bounds.size.width
     }
     private func GetboundsHeight() -> CGFloat {
         return self.view.bounds.size.height
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
-//    private var progressKey:String = "Copyright © 2016年 谈超. All rights reserved..navigationBarLay为了防止重复我多写了点"
-//    var progress :Double{
-//        set{
-//            objc_setAssociatedObject(self, &progressKey, newValue, .OBJC_ASSOCIATION_ASSIGN)
-//        }
-//        get{
-//            return (objc_getAssociatedObject(self, &progressKey) as?Double) ?? 0.0
-//        }
-//    }
