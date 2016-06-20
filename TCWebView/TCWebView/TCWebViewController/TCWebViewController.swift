@@ -40,7 +40,7 @@ class TCWebViewController: UIViewController {
         let location = panGesture.locationInView(webView)
         switch panGesture.state {
         case .Began:
-            if location.x <= 50 && translation.x > 0{startPopSnapshotView()}
+            if location.x <= 50 && translation.x >= 0{startPopSnapshotView()}
             break
         case .Changed:
             popSnapShotViewWithPanGestureDistance(translation.x)
@@ -83,7 +83,7 @@ class TCWebViewController: UIViewController {
                 self.currentSnapShotView?.center = CGPointMake(self.GetboundsWidth() * 3/2, self.GetboundsHeight()/2)
                 self.prevSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2, self.GetboundsHeight()/2)
                 self.swipingBackgoundView.alpha = 0
-                }, completion: { (_) in
+                }, completion: { [unowned self](_) in
                     self.prevSnapShotView?.removeFromSuperview()
                     self.swipingBackgoundView.removeFromSuperview()
                     self.currentSnapShotView?.removeFromSuperview()
@@ -97,7 +97,7 @@ class TCWebViewController: UIViewController {
                 self.currentSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2, self.GetboundsHeight()/2)
                 self.prevSnapShotView?.center = CGPointMake(self.GetboundsWidth()/2-60, self.GetboundsHeight())
                 self.prevSnapShotView?.alpha = 1
-                }, completion: { (_) in
+                }, completion: {[unowned self] (_) in
                     self.prevSnapShotView?.removeFromSuperview()
                     self.swipingBackgoundView.removeFromSuperview()
                     self.currentSnapShotView?.removeFromSuperview()
