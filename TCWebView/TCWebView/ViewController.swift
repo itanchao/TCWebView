@@ -9,12 +9,12 @@
 import UIKit
 
 class ViewController: UIViewController {
-    lazy private  var urlBtn: UIButton = {
+    lazy fileprivate  var urlBtn: UIButton = {
         let object = UIButton()
-        object.setTitle("进入百度", forState: .Normal)
-        object.setTitleColor(UIColor.blueColor(), forState: .Normal)
-        object.titleLabel?.font = UIFont.systemFontOfSize(13)
-        object.addTarget(self, action: #selector(urldidClick), forControlEvents: .TouchUpInside)
+        object.setTitle("进入百度", for: UIControlState())
+        object.setTitleColor(UIColor.blue, for: UIControlState())
+        object.titleLabel?.font = UIFont.systemFont(ofSize: 13)
+        object.addTarget(self, action: #selector(urldidClick), for: .touchUpInside)
         return object
     }()
 
@@ -22,14 +22,14 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         view.addSubview(urlBtn)
         urlBtn.translatesAutoresizingMaskIntoConstraints = false
-        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .CenterX, relatedBy: .Equal, toItem: view, attribute: .CenterX, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .CenterY, relatedBy: .Equal, toItem: view, attribute: .CenterY, multiplier: 1, constant: 0))
-        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .Width, multiplier: 1, constant: 100))
-        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .Height, multiplier: 1, constant: 100))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .width, multiplier: 1, constant: 100))
+        view.addConstraint(NSLayoutConstraint(item: urlBtn, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1, constant: 100))
     }
     func urldidClick() {
         let vc = TCWebViewController()
-        vc.url = NSURL(string: "https://m.baidu.com")
+        vc.url = URL(string: "https://m.baidu.com")
         self.navigationController?.pushViewController(vc, animated: true)
     }
     override func didReceiveMemoryWarning() {
